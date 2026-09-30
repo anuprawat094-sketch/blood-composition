@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blood Composition | Smart Board Interactive Lab</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#030711;color:#fff;font-family:Arial,"Noto Sans Devanagari",sans-serif;overflow-x:hidden}
+header{height:110px;display:flex;align-items:center;justify-content:space-between;padding:12px 28px;background:linear-gradient(90deg,#07182a,#100817);border-bottom:2px solid #24465b}
+h1{margin:0;color:#ffe34d;font-size:clamp(30px,3.5vw,52px);font-weight:900}header .sub{color:#8cefff;font-size:18px;font-weight:800}
+.board{width:min(96vw,1777px);aspect-ratio:16/9;margin:18px auto;background:#07101d;border:2px solid #2a536c;border-radius:28px;padding:18px;box-shadow:0 0 45px #00eaff18;display:grid;grid-template-columns:1.55fr .85fr;gap:16px}
+.left{min-width:0;display:flex;flex-direction:column}.scene{position:relative;flex:1;min-height:0;overflow:hidden;border-radius:22px;border:3px solid #ff4268;background:radial-gradient(ellipse at center,#8d102e,#430817 46%,#10030a 85%)}
+.scene:after{content:"";position:absolute;inset:-15%;background:repeating-radial-gradient(ellipse at center,#ff5a6c12 0 8px,#0000 9px 26px);animation:pulse 4s infinite}
+@keyframes pulse{50%{transform:scale(1.06);opacity:.5}}
+.sceneLabel{position:absolute;top:13px;left:13px;z-index:5;background:#061622e8;border:2px solid #5beeff;border-radius:12px;padding:8px 12px;color:#82f6ff;font-weight:900;font-size:16px}
+.flow{position:absolute;inset:0;z-index:3}
+.cell{position:absolute;cursor:pointer;touch-action:manipulation;transition:filter .2s,opacity .2s;animation:move linear infinite}
+.cell:hover{filter:brightness(1.35) drop-shadow(0 0 13px #fff)!important;z-index:20}
+.rbc{width:58px;height:39px;border-radius:50%;background:radial-gradient(ellipse,#ffacb7 0 15%,#ed244a 32%,#a8072c 74%);box-shadow:0 0 18px #ff315a99,inset 0 0 9px #ffd1d8}
+.rbc:after{content:"";position:absolute;inset:11px 18px;border-radius:50%;background:#81051f99}
+.wbc{width:56px;height:56px;border-radius:50%;background:radial-gradient(circle,#fff 0 55%,#b9f5ff 68%,#31cfff);box-shadow:0 0 24px #4de5ff}
+.wbc:after{content:"";position:absolute;width:32px;height:28px;left:12px;top:15px;border-radius:45%;background:#8b40f2;box-shadow:8px 0 #c268ff}
+.plt{width:28px;height:20px;border-radius:60%;background:#e092ff;box-shadow:0 0 18px #c35cff}
+.plasma{width:8px;height:8px;border-radius:50%;background:#72f8ff;box-shadow:0 0 14px #72f8ff}
+@keyframes move{from{transform:translate(-100px,0) rotate(0)}50%{transform:translate(55vw,-25px) rotate(180deg)}to{transform:translate(120vw,12px) rotate(360deg)}}
+.controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding-top:10px}.controls button,.tabs button{border:2px solid #4a697b;background:#0d1b2a;color:#fff;border-radius:13px;padding:9px 13px;font-weight:900;font-size:15px;cursor:pointer}.controls button:hover,.tabs button:hover{transform:translateY(-2px)}
+.right{min-width:0;display:flex;flex-direction:column;gap:12px}.lesson{background:#0b1928;border:2px solid #29475c;border-radius:20px;padding:16px;flex:1;overflow:auto}.lesson h2{color:#ffe34d;margin:0 0 8px;font-size:27px}.lesson p,.lesson li{font-size:17px;line-height:1.55;font-weight:700;color:#f4fbff}.lesson ul{padding-left:22px}.hint{color:#7ff3ff!important}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{padding:10px;border-radius:14px;background:#101e2e;text-align:center;font-weight:900;border:1px solid #2c5065}.red{color:#ff7189}.cyan{color:#75eeff}.purple{color:#e19aff}.yellow{color:#ffe65d}
+.bar{height:30px;display:flex;border-radius:15px;overflow:hidden;border:2px solid white}.bar div{display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900}.pb{width:55%;background:#ffe34d;color:#111}.fb{width:45%;background:linear-gradient(90deg,#ff365d,#b55cff)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}.tabs button.active{background:#35def5;color:#021018}
+.overlay{display:none;position:fixed;inset:0;background:#02050bcc;z-index:100;align-items:center;justify-content:center;padding:22px}.overlay.show{display:flex}
+.modal{width:min(1100px,94vw);max-height:92vh;overflow:auto;background:#081522;border:3px solid #50eaff;border-radius:26px;padding:20px;box-shadow:0 0 70px #00dfff55;position:relative}
+.close{position:absolute;right:15px;top:12px;border:2px solid #ff6680;background:#260b15;color:#fff;border-radius:50%;width:44px;height:44px;font-size:24px;font-weight:900;cursor:pointer}
+.modal h2{margin:0 55px 8px 0;color:#ffe34d;font-size:34px}.microscope{height:310px;border-radius:22px;background:radial-gradient(circle,#35101b,#0a111c 72%);border:2px solid #39566b;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.bigRBC{width:270px;height:185px;border-radius:50%;background:radial-gradient(ellipse,#ffadb8 0 13%,#f1274e 27%,#a7062b 72%);box-shadow:0 0 45px #ff315a88,inset 0 0 30px #ffd3da;position:relative}
+.bigRBC:after{content:"";position:absolute;width:86px;height:55px;left:92px;top:65px;border-radius:50%;background:#82051f88}
+.bigWBC{width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,#fff 0 55%,#baf5ff 70%,#35cfff);box-shadow:0 0 45px #52e7ff99;position:relative}
+.bigWBC:after{content:"";position:absolute;width:125px;height:105px;left:48px;top:59px;border-radius:45%;background:#8a3ff0;box-shadow:28px 0 #c56bff}
+.bigPLT{width:230px;height:145px;border-radius:58%;background:#e39aff;box-shadow:0 0 40px #c65dff;transform:rotate(-12deg)}
+.bigPLASMA{width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,#8bffff,#168ca8 28%,#071d2b 70%);box-shadow:0 0 45px #36eaff55;position:relative}.bigPLASMA:after{content:"";position:absolute;width:12px;height:12px;border-radius:50%;background:#fff;top:65px;left:80px;box-shadow:60px 35px #ffe34d,30px 80px #ff7b8d,-35px 45px #a875ff}
+.labels{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}.lab{background:#101e2e;border-radius:14px;padding:12px}.lab b{display:block;color:#ffe34d;font-size:16px;margin-bottom:3px}.lab span{font-weight:700;color:#f5fbff}
+@media(max-width:900px){.board{aspect-ratio:auto;grid-template-columns:1fr}.scene{height:55vw;min-height:320px}.lesson{min-height:300px}.board{width:96vw}.labels{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header><div><h1>🩸 रक्त की संरचना</h1><div class="sub">Smart Board • Interactive Biology Lab</div></div><div class="sub">👆 Cell को Touch करें</div></header>
+
+<main class="board">
+<section class="left">
+<div class="scene"><div class="sceneLabel">🔬 BLOOD VESSEL • Touch a cell to inspect</div><div class="flow" id="flow"></div></div>
+<div class="controls">
+<button id="all">🩸 पूरा रक्त</button><button id="r">🔴 RBC</button><button id="w">⚪ WBC</button><button id="t">🟣 Platelets</button><button id="p">🟡 Plasma</button><button id="pause">⏸ Pause</button>
+</div>
+</section>
+
+<section class="right">
+<div class="stats">
+<div class="stat red">🔴 RBC<br>O₂ transport</div><div class="stat cyan">⚪ WBC<br>Defense</div>
+<div class="stat purple">🟣 Platelets<br>Clotting</div><div class="stat yellow">🟡 Plasma<br>Transport medium</div>
+</div>
+<div class="bar"><div class="pb">Plasma ≈ 55%</div><div class="fb">Formed elements ≈ 45%</div></div>
+<div class="tabs">
+<button class="active" data-key="overview">Overview</button><button data-key="rbcInfo">RBC</button><button data-key="wbcInfo">WBC</button><button data-key="pltInfo">Platelets</button><button data-key="plasmaInfo">Plasma</button>
+</div>
+<div class="lesson" id="lesson"></div>
+</section>
+</main>
+
+<div class="overlay" id="overlay"><div class="modal"><button class="close" onclick="closeModal()">×</button><h2 id="modalTitle"></h2><div class="microscope" id="microscope"></div><div class="labels" id="labels"></div></div></div>
+
+<script>
+const flow=document.getElementById("flow");
+const types=["rbc","rbc","rbc","rbc","rbc","rbc","rbc","rbc","wbc","wbc","plt","plt","plt","plasma","plasma","plasma","plasma","plasma","plasma"];
+for(let i=0;i<60;i++){let type=types[Math.floor(Math.random()*types.length)],x=document.createElement("div");x.className="cell "+type;x.style.left=Math.random()*100+"%";x.style.top=(18+Math.random()*65)+"%";x.style.animationDelay=(-Math.random()*8)+"s";x.style.animationDuration=(type==="rbc"?5+Math.random()*4:type==="plasma"?3+Math.random()*3:7+Math.random()*5)+"s";x.onclick=()=>openModal(type);flow.appendChild(x)}
+const data={
+overview:["🩸 रक्त क्या है?","रक्त एक तरल संयोजी ऊतक है। इसमें प्लाज़्मा तथा निर्मित तत्व होते हैं। सामान्यतः प्लाज़्मा लगभग 55% और निर्मित तत्व लगभग 45% होते हैं। निर्मित तत्वों में RBC, WBC और Platelets शामिल हैं।","<ul><li>Plasma: तरल matrix</li><li>RBC: मुख्यतः O₂ transport</li><li>WBC: प्रतिरक्षा रक्षा</li><li>Platelets: hemostasis/clotting</li></ul>"],
+rbcInfo:["🔴 RBC • Erythrocyte","मानव की परिपक्व RBC सामान्यतः biconcave और anucleate होती है। इसका प्रमुख कार्य respiratory gases का transport है। हीमोग्लोबिन O₂ के परिवहन में महत्वपूर्ण है।","<ul><li>आकार: biconcave disc</li><li>परिपक्व मानव RBC में nucleus नहीं</li><li>हीमोग्लोबिन उपस्थित</li><li>मुख्य कार्य: O₂ transport</li></ul>"],
+wbcInfo:["⚪ WBC • Leukocyte","WBC nucleated blood cells हैं और शरीर की प्रतिरक्षा रक्षा में महत्वपूर्ण भूमिका निभाती हैं। विभिन्न WBC अलग-अलग प्रकार की immune responses में भाग लेती हैं।","<ul><li>Nucleus उपस्थित</li><li>शरीर की defense system का भाग</li><li>Granulocytes और agranulocytes प्रमुख समूह</li></ul>"],
+pltInfo:["🟣 Platelets • Thrombocytes","Platelets megakaryocytes से बनने वाले cell fragments हैं। ये damaged blood vessel पर platelet plug बनाने और clotting process में महत्वपूर्ण भूमिका निभाते हैं।","<ul><li>पूर्ण कोशिका नहीं, cell fragments</li><li>Megakaryocytes से उत्पन्न</li><li>Hemostasis में महत्वपूर्ण</li></ul>"],
+plasmaInfo:["🟡 Plasma","Plasma रक्त का straw-coloured तरल matrix है। इसमें मुख्यतः water के साथ plasma proteins, electrolytes, nutrients, hormones, gases और metabolic wastes पाए जाते हैं।","<ul><li>लगभग 55% blood volume</li><li>मुख्य घटक: water</li><li>Transport medium का कार्य</li></ul>"]
+};
+function show(k){let d=data[k];document.getElementById("lesson").innerHTML="<h2>"+d[0]+"</h2><p>"+d[1]+"</p>"+d[2]+"<p class='hint'>💡 किसी moving cell को Touch करें और उसका बड़ा structure देखें।</p>";document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("active",b.dataset.key===k))}
+show("overview");document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>show(b.dataset.key));
+function focus(t){document.querySelectorAll(".cell").forEach(c=>{let y=t==="all"||c.classList.contains(t);c.style.opacity=y?"1":".08";c.style.filter=y?"none":"grayscale(1)"})}
+all.onclick=()=>{focus("all");show("overview")};r.onclick=()=>{focus("rbc");show("rbcInfo")};w.onclick=()=>{focus("wbc");show("wbcInfo")};t.onclick=()=>{focus("plt");show("pltInfo")};p.onclick=()=>{focus("plasma");show("plasmaInfo")};
+let paused=false;pause.onclick=()=>{paused=!paused;document.querySelectorAll(".cell").forEach(c=>c.style.animationPlayState=paused?"paused":"running");pause.textContent=paused?"▶️ Play":"⏸ Pause"};
+const modalData={
+rbc:["🔴 RBC का Structure","bigRBC",[["Biconcave shape","गैसों के आदान-प्रदान के लिए उपयोगी सतह क्षेत्र बढ़ाता है"],["Cell membrane","RBC को घेरने वाली लचीली झिल्ली"],["Haemoglobin","O₂ के परिवहन में महत्वपूर्ण protein"],["Nucleus","परिपक्व मानव RBC में nucleus अनुपस्थित"]]],
+wbc:["⚪ WBC का Structure","bigWBC",[["Cell membrane","WBC की बाहरी सीमा"],["Nucleus","WBC का प्रमुख स्पष्ट cellular component"],["Cytoplasm","Nucleus के आसपास का cellular भाग"],["Function","प्रतिरक्षा रक्षा में भागीदारी"]]],
+plt:["🟣 Platelet का Structure","bigPLT",[["Cell fragment","Platelet पूर्ण कोशिका नहीं है"],["Granules","Clotting/hemostasis से संबंधित पदार्थ"],["Origin","Megakaryocyte से बनता है"],["Function","Platelet plug और clot formation में सहायता"]]],
+plasma:["🟡 Plasma का Composition","bigPLASMA",[["Water","Plasma का सबसे बड़ा घटक"],["Proteins","Albumin, globulins, fibrinogen आदि"],["Solutes","Electrolytes, nutrients, hormones आदि"],["Function","विभिन्न पदार्थों के transport का medium"]]]
+};
+function openModal(type){let d=modalData[type];document.getElementById("modalTitle").textContent=d[0];document.getElementById("microscope").innerHTML='<div class="'+d[1]+'"></div>';document.getElementById("labels").innerHTML=d[2].map(x=>'<div class="lab"><b>'+x[0]+'</b><span>'+x[1]+'</span></div>').join("");document.getElementById("overlay").classList.add("show")}
+function closeModal(){document.getElementById("overlay").classList.remove("show")}
+document.getElementById("overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeModal()});
+</script>
+</body>
+</html>
